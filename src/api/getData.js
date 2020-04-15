@@ -4,19 +4,19 @@ import fetch from '@/config/fetch'
  * 登陆
  */
 
-export const login = data => fetch('/admin/login', data, 'POST');
+export const login = data => fetch('/v5/login', data, 'POST');
 
 /**
  * 退出
  */
 
-export const signout = () => fetch('/admin/signout');
+export const signout = () => fetch('/v5/signout');
 
 /**
  * 获取用户信息
  */
 
-export const getAdminInfo = () => fetch('/admin/info');
+export const getAdminInfo = () => fetch('/v5/info');
 
 /**
  * api请求量
@@ -72,7 +72,7 @@ export const adminCount = () => fetch('/admin/count');
  * 获取定位城市
  */
 
-export const cityGuess = () => fetch('/v1/cities', {
+export const cityGuess = () => fetch('/v3/cities', {
 	type: 'guess'
 });
 
@@ -80,13 +80,13 @@ export const cityGuess = () => fetch('/v1/cities', {
  * 添加商铺
  */
 
-export const addShop = data => fetch('/shopping/addShop', data, 'POST');
+export const addShop = data => fetch('/v2/addShop', data, 'POST');
 
 /**
  * 获取搜索地址
  */
 
-export const searchplace = (cityid, value) => fetch('/v1/pois', {
+export const searchplace = (cityid, value) => fetch('/v3/pois', {
 	type: 'search',
 	city_id: cityid,
 	keyword: value
@@ -116,7 +116,7 @@ export const addFood = data => fetch('/shopping/addfood', data, 'POST');
  * category 种类列表
  */
 
-export const foodCategory = (latitude, longitude) => fetch('/shopping/v2/restaurant/category');
+export const foodCategory = (latitude, longitude) => fetch('/v2/restaurant/category');
 
 /**
  * 获取餐馆列表

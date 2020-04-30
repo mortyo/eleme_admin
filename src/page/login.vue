@@ -7,7 +7,7 @@
 		  		</div>
 		    	<el-form :model="loginForm" :rules="rules" ref="loginForm">
 					<el-form-item prop="username">
-						<el-input v-model="loginForm.username" placeholder="用户名"><span>dsfsf</span></el-input>
+						<el-input v-model="loginForm.username" placeholder="用户名"></el-input>
 					</el-form-item>
 					<el-form-item prop="password">
 						<el-input type="password" placeholder="密码" v-model="loginForm.password"></el-input>
@@ -25,7 +25,7 @@
 </template>
 
 <script>
-	import {login, getAdminInfo} from '@/api/getData'
+	import { login } from '@/api/getData'
 	import {mapActions, mapState} from 'vuex'
 
 	export default {
@@ -50,7 +50,7 @@
 			this.showLogin = true;
 			if (!this.adminInfo.id) {
     			this.getAdminData()
-    		}
+			}
 		},
 		computed: {
 			...mapState(['adminInfo']),

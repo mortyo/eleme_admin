@@ -1,4 +1,5 @@
 import fetch from '@/config/fetch'
+import axios from 'axios'
 
 /**
  * 登陆
@@ -10,13 +11,13 @@ export const login = data => fetch('/v5/login', data, 'POST');
  * 退出
  */
 
-export const signout = () => fetch('/v5/signout');
+export const signout = () => fetch('/admin/singout');
 
 /**
  * 获取用户信息
  */
 
-export const getAdminInfo = () => fetch('/v5/info');
+export const getAdminInfo = () => fetch('/admin/info');
 
 /**
  * api请求量
@@ -41,20 +42,20 @@ export const apiAllRecord = () => fetch('/statis/api/all');
  * 用户注册量
  */
 
-export const userCount = date => fetch('/statis/user/' + date + '/count');
+export const userCount = date => axios.get('/v6/user/' + date + '/count');
 
 /**
  * 某一天订单数量
  */
 
-export const orderCount = date => fetch('/statis/order/' + date + '/count');
+export const orderCount = date => axios.get('/v6/order/' + date + '/count');
 
 
 /**
  * 某一天管理员注册量
  */
 
-export const adminDayCount = date => fetch('/statis/admin/' + date + '/count');
+export const adminDayCount = date => axios.get('/v6/admin/' + date + '/count');
 
 /**
  * 管理员列表
@@ -66,30 +67,34 @@ export const adminList = data => fetch('/admin/all', data);
  * 管理员数量
  */
 
-export const adminCount = () => fetch('/admin/count');
+export const adminCount = () => axios.get('/v5/count');
 
 /**
  * 获取定位城市
  */
 
-export const cityGuess = () => fetch('/v3/cities', {
-	type: 'guess'
+export const cityGuess = () => axios.get('https://elm.cangdu.org/v1/cities', {
+	params: {
+		type: 'guess'
+	}	
 });
 
 /**
  * 添加商铺
  */
 
-export const addShop = data => fetch('/v2/addShop', data, 'POST');
+export const addShop = data => fetch('/shopping/addShop', data, 'POST');
 
 /**
  * 获取搜索地址
  */
 
-export const searchplace = (cityid, value) => fetch('/v3/pois', {
-	type: 'search',
-	city_id: cityid,
-	keyword: value
+export const searchplace = (cityid, value) => axios.get('/v3/pois', {
+  	params: {	
+	  	type: 'search',
+		city_id: cityid,
+		keyword: value
+	}
 });
 
 /**
@@ -116,13 +121,15 @@ export const addFood = data => fetch('/shopping/addfood', data, 'POST');
  * category 种类列表
  */
 
-export const foodCategory = (latitude, longitude) => fetch('/v2/restaurant/category');
+export const foodCategory = () => axios.get('/v2/getCategories');
 
 /**
  * 获取餐馆列表
  */
 
-export const getResturants = data => fetch('/shopping/restaurants', data);
+export const getResturants = data => axios.get('/v2/shops', {
+	params:data
+});
 
 /**
  * 获取餐馆详细信息
@@ -134,19 +141,19 @@ export const getResturantDetail = restaurant_id => fetch('/shopping/restaurant/'
  * 获取餐馆数量
  */
 
-export const getResturantsCount = () => fetch('/shopping/restaurants/count');
+export const getResturantsCount = () => axios.get('/v2/shops/count');
 
 /**
  * 更新餐馆信息
  */
 
-export const updateResturant = data => fetch('/shopping/updateshop', data, 'POST');
+export const updateResturant = data => axios.post('/v2/updateshop', data);
 
 /**
  * 删除餐馆
  */
 
-export const deleteResturant = restaurant_id => fetch('/shopping/restaurant/' + restaurant_id, {}, 'DELETE');
+export const deleteResturant = restaurant_id => axios.delete('/v2/shop/' + restaurant_id);
 
 /**
  * 获取食品列表
@@ -189,13 +196,13 @@ export const deleteFood = food_id => fetch('/shopping/v2/food/' + food_id, {}, '
  * 获取用户列表
  */
 
-export const getUserList = data => fetch('/v1/users/list', data);
+export const getUserList = data => axios.get('/v1/users/list', data);
 
 /**
  * 获取用户数量
  */
 
-export const getUserCount = data => fetch('/v1/users/count', data);
+export const getUserCount = data => axios.get('/v1/users/count', data);
 
 /**
  * 获取订单列表
@@ -207,7 +214,7 @@ export const getOrderList = data => fetch('/bos/orders', data);
  * 获取订单数量
  */
 
-export const getOrderCount = data => fetch('/bos/orders/count', data);
+export const getOrderCount = data => axios.get('/v2/orders/count', data);
 
 /**
  * 获取用户信息

@@ -74,17 +74,20 @@
     	},
         created(){
             this.initData();
+            
         },
         methods: {
             async initData(){
                 try{
-                    const countData = await getUserCount();
-                    if (countData.status == 1) {
-                        this.count = countData.count;
-                    }else{
-                        throw new Error('获取数据失败');
-                    }
-                    this.getUsers();
+                    getUserCount().then(res=>{
+                        let countData =res.data;
+                        if (countData.status == 1) {
+                            this.count = countData.count;
+                        }else{
+                            throw new Error('获取数据失败');
+                        }
+                        this.getUsers();
+                    });
                 }catch(err){
                     console.log('获取数据失败', err);
                 }
@@ -97,16 +100,18 @@
                 this.offset = (val - 1)*this.limit;
                 this.getUsers()
             },
-            async getUsers(){
-                const Users = await getUserList({offset: this.offset, limit: this.limit});
-                this.tableData = [];
-                Users.forEach(item => {
-                    const tableData = {};
-                    tableData.username = item.username;
-                    tableData.registe_time = item.registe_time;
-                    tableData.city = item.city;
-                    this.tableData.push(tableData);
-                })
+            getUsers(){
+                getUserList({offset: this.offset, limit: this.limit}).then(res=>{
+                    let Users = res.data;
+                    this.tableData = [];
+                    Users.forEach(item => {
+                        const tableData = {};
+                        tableData.username = item.username;
+                        tableData.registe_time = item.registe_time;
+                        tableData.city = item.city;
+                        this.tableData.push(tableData);
+                    })
+                });
             }
         },
     }

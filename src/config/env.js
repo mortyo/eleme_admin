@@ -7,7 +7,6 @@
  * 
  */
 let baseUrl = ''; 
-let routerMode = 'hash';
 let baseImgPath;
 
 if (process.env.NODE_ENV == 'development') {
@@ -15,11 +14,10 @@ if (process.env.NODE_ENV == 'development') {
     baseImgPath = '/img/';
 }else{
 	baseUrl = '//elm.cangdu.org';
-    baseImgPath = '//elm.cangdu.org/img/';
+    baseImgPath = '/img/';
 }
 
 export {
 	baseUrl,
-	routerMode,
 	baseImgPath
 }

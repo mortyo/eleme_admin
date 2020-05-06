@@ -50,7 +50,7 @@
 					<el-form-item label="上传食品图片">
 						<el-upload
 						  class="avatar-uploader"
-						  :action="baseUrl + '/v1/addimg/food'"
+						  :action="baseUrl + '/v4/addimg/food'"
 						  :show-file-list="false"
 						  :on-success="uploadImg"
 						  :before-upload="beforeImgUpload">
@@ -157,7 +157,7 @@
     				activity: '',
     				attributes: [],
     				specs: [{
-    					specs: '默认',
+    					specs_name: '默认',
 			          	packing_fee: 0,
 			          	price: 20,
     				}],
@@ -178,7 +178,7 @@
     			foodSpecs: 'one',
     			dialogFormVisible: false,
 		        specsForm: {
-		          	specs: '',
+		          	specs_name: '',
 		          	packing_fee: 0,
 		          	price: 20,
 		        },
@@ -227,7 +227,8 @@
     	methods: {
     		async initData(){
     			try{
-    				const result = await getCategory(this.restaurant_id);
+					const result = await getCategory(this.restaurant_id);
+					console.log(result)
 	    			if (result.status == 1) {
 	    				result.category_list.map((item, index) => {
 	    					item.value = index;
@@ -250,7 +251,7 @@
 						const params = {
 							name: this.categoryForm.name,
 							description: this.categoryForm.description,
-							restaurant_id: this.restaurant_id,
+							shop_id: this.restaurant_id,
 						}
 						try{
 							const result = await addCategory(params);
@@ -320,9 +321,10 @@
 						const params = {
 							...this.foodForm,
 							category_id: this.selectValue.id,
-							restaurant_id: this.restaurant_id,
+							shop_id: Number(this.restaurant_id),
 						}
 						try{
+							console.log(params)
 							const result = await addFood(params);
 							if (result.status == 1) {
 								console.log(result)
@@ -337,7 +339,7 @@
 				    				activity: '',
 				    				attributes: [],
 				    				specs: [{
-				    					specs: '默认',
+				    					specs_name: '默认',
 							          	packing_fee: 0,
 							          	price: 20,
 				    				}],

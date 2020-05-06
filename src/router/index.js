@@ -78,6 +78,7 @@ const routes = [
 
 export default new Router({
 	routes,
-	mode: 'history',
+	// mode: 'history',
 	strict: process.env.NODE_ENV !== 'production',
+	base: '/admin/'
 })

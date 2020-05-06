@@ -75,7 +75,7 @@
                   :total="count">
                 </el-pagination>
             </div>
-            <el-dialog title="修改食品信息" :visible.sync="dialogFormVisible">
+            <el-dialog title="修改食品信息" v-model="dialogFormVisible">
                 <el-form :model="selectTable">
                     <el-form-item label="食品名称" label-width="100px">
                         <el-input v-model="selectTable.name" auto-complete="off"></el-input>
@@ -197,7 +197,7 @@
             }
         },
         created(){
-        	this.restaurant_id = this.$route.query.restaurant_id;
+            this.restaurant_id = this.$route.query.restaurant_id;
             this.initData();
         },
         computed: {
@@ -221,7 +221,8 @@
         methods: {
             async initData(){
                 try{
-                    const countData = await getFoodsCount({restaurant_id: this.restaurant_id});
+                    const countData = await getFoodsCount({shop_id: this.restaurant_id});
+                    console.log(countData)
                     if (countData.status == 1) {
                         this.count = countData.count;
                     }else{

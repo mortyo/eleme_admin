@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {getAdminInfo} from '@/api/getData'
+import { getAdminInfo } from '@/api/getData'
 
 Vue.use(Vuex)
 
@@ -27,7 +27,7 @@ const actions = {
 				throw new Error(res.type)
 			}
 		}catch(err){
-			// console.log(err.message)
+			console.log(err.message)
 		}
 	}
 }

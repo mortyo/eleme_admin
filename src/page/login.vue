@@ -3,11 +3,12 @@
 	  	<transition name="form-fade" mode="in-out">
 	  		<section class="form_contianer" v-show="showLogin">
 		  		<div class="manage_tip">
-		  			<p>elm后台管理系统</p>
+					<a href="http://localhost:8001/eleme/index.html" style="text-align:center;"><h3>👉客户端入口👈</h3></a><br>
+		  			<p>后台管理系统</p>
 		  		</div>
 		    	<el-form :model="loginForm" :rules="rules" ref="loginForm">
 					<el-form-item prop="username">
-						<el-input v-model="loginForm.username" placeholder="用户名"></el-input>
+						<el-input v-model="loginForm.username" placeholder="用户名"><span>dsfsf</span></el-input>
 					</el-form-item>
 					<el-form-item prop="password">
 						<el-input type="password" placeholder="密码" v-model="loginForm.password"></el-input>
@@ -25,7 +26,7 @@
 </template>
 
 <script>
-	import { login } from '@/api/getData'
+	import {login, getAdminInfo} from '@/api/getData'
 	import {mapActions, mapState} from 'vuex'
 
 	export default {
@@ -50,7 +51,7 @@
 			this.showLogin = true;
 			if (!this.adminInfo.id) {
     			this.getAdminData()
-			}
+    		}
 		},
 		computed: {
 			...mapState(['adminInfo']),
@@ -60,19 +61,21 @@
 			async submitForm(formName) {
 				this.$refs[formName].validate(async (valid) => {
 					if (valid) {
-						const res = await login({user_name: this.loginForm.username, password: this.loginForm.password})
-						if (res.status == 1) {
-							this.$message({
-		                        type: 'success',
-		                        message: '登录成功'
-		                    });
-							this.$router.push('manage')
-						}else{
-							this.$message({
-		                        type: 'error',
-		                        message: res.message
-		                    });
-						}
+						login({user_name: this.loginForm.username, password: this.loginForm.password}).then(res => {
+							console.log(res.data)
+							if (res.data.status == 1) {
+								this.$message({
+									type: 'success',
+									message: '登录成功'
+								});
+								this.$router.push('manage')
+							}else{
+								this.$message({
+									type: 'error',
+									message: res.data.message
+								});
+							}
+						})
 					} else {
 						this.$notify.error({
 							title: '错误',
@@ -110,7 +113,6 @@
 		left: 0;
 		p{
 			font-size: 34px;
-			color: #fff;
 		}
 	}
 	.form_contianer{

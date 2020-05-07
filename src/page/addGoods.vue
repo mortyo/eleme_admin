@@ -227,17 +227,18 @@
     	methods: {
     		async initData(){
     			try{
-					const result = await getCategory(this.restaurant_id);
-					console.log(result)
-	    			if (result.status == 1) {
-	    				result.category_list.map((item, index) => {
-	    					item.value = index;
-	    					item.label = item.name;
-	    				})
-	    				this.categoryForm.categoryList = result.category_list;
-	    			}else{
-	    				console.log(result)
-	    			}
+					getCategory(this.restaurant_id).then(res => {
+						const result = res.data
+						if (result.status == 1) {
+							result.category_list.map((item, index) => {
+								item.value = index;
+								item.label = item.name;
+							})
+							this.categoryForm.categoryList = result.category_list;
+						}else{
+							console.log(result)
+						}
+					});
     			}catch(err){
     				console.log(err)
     			}
@@ -246,7 +247,8 @@
 		    	this.showAddCategory = !this.showAddCategory;
 		    },
 		    submitcategoryForm(categoryForm) {
-				this.$refs[categoryForm].validate(async (valid) => {
+				this.$refs[categoryForm].validate(async (valid) => {  //表单验证
+					console.log(valid)
 					if (valid) {
 						const params = {
 							name: this.categoryForm.name,
@@ -254,17 +256,21 @@
 							shop_id: this.restaurant_id,
 						}
 						try{
-							const result = await addCategory(params);
-							if (result.status == 1) {
-								this.initData();
-								this.categoryForm.name = '';
-								this.categoryForm.description = '';
-								this.showAddCategory = false;
-								this.$message({
-					            	type: 'success',
-					            	message: '添加成功'
-					          	});
-							}
+							console.log(params)
+						 	addCategory(params).then(res => {
+								 const result = res.data
+								 console.log(result)
+								 if (result.status == 1) {
+									 this.initData();
+									 this.categoryForm.name = '';
+									 this.categoryForm.description = '';
+									 this.showAddCategory = false;
+									 this.$message({
+										 type: 'success',
+										 message: '添加成功'
+									   });
+								 }
+							 });
 						}catch(err){
 							console.log(err)
 						}
@@ -325,31 +331,33 @@
 						}
 						try{
 							console.log(params)
-							const result = await addFood(params);
-							if (result.status == 1) {
-								console.log(result)
-								this.$message({
-					            	type: 'success',
-					            	message: '添加成功'
-					          	});
-					          	this.foodForm = {
-				    				name: '',
-				    				description: '',
-				    				image_path: '',
-				    				activity: '',
-				    				attributes: [],
-				    				specs: [{
-				    					specs_name: '默认',
-							          	packing_fee: 0,
-							          	price: 20,
-				    				}],
-				    			}
-							}else{
-								this.$message({
-					            	type: 'error',
-					            	message: result.message
-					          	});
-							}
+							addFood(params).then(res => {
+							const result = res.data 
+								if (result.status == 1) {
+									console.log(result)
+									this.$message({
+										type: 'success',
+										message: '添加成功'
+									  });
+									  this.foodForm = {
+										name: '',
+										description: '',
+										image_path: '',
+										activity: '',
+										attributes: [],
+										specs: [{
+											specs_name: '默认',
+											  packing_fee: 0,
+											  price: 20,
+										}],
+									}
+								}else{
+									this.$message({
+										type: 'error',
+										message: result.message
+									  });
+								}
+							});
 						}catch(err){
 							console.log(err)
 						}

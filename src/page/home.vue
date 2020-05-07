@@ -59,12 +59,12 @@
     			Promise.all([userCount(today), orderCount(today), adminDayCount(today), getUserCount(), getOrderCount(), adminCount()])
     			.then(res => {
 					console.log(res)
-					this.userCount = res[0].count;
-    				this.orderCount = res[1].count;
-                    this.adminCount = res[2].count;
-                    this.allUserCount = res[3].count;
-                    this.allOrderCount = res[4].count;
-                    this.allAdminCount = res[5].count;
+					this.userCount = res[0].data.count;
+    				this.orderCount = res[1].data.count;
+                    this.adminCount = res[2].data.count;
+                    this.allUserCount = res[3].data.count;
+                    this.allOrderCount = res[4].data.count;
+                    this.allAdminCount = res[5].data.count;
     			}).catch(err => {
     				console.log(err)
     			})

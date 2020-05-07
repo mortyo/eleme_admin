@@ -19,7 +19,7 @@ const mutations = {
 const actions = {
 	async getAdminData({commit}){
 		try{
-			const res = await getAdminInfo()
+			const res = await getAdminInfo().then(res=>{ return res.data })
 			if (res.status == 1) {
 				commit('saveAdminInfo', res.data);
 				console.log(res.data)

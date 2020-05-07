@@ -47,7 +47,7 @@
                   label="店铺介绍"
                   prop="description">
                 </el-table-column>
-                <el-table-column label="操作" width="200">
+                <el-table-column label="操作" width="300">
                   <template slot-scope="scope">
                     <el-button
                       size="mini"
@@ -73,7 +73,7 @@
                   :total="count">
                 </el-pagination>
             </div>
-            <el-dialog title="修改店铺信息" v-model="dialogFormVisible">
+            <el-dialog title="修改店铺信息" :visible.sync="dialogFormVisible">
                 <el-form :model="selectTable">
                     <el-form-item label="店铺名称" label-width="100px">
                         <el-input v-model="selectTable.name" auto-complete="off"></el-input>
@@ -104,7 +104,7 @@
                     <el-form-item label="商铺图片" label-width="100px">
                         <el-upload
                           class="avatar-uploader"
-                          :action="baseUrl + '/v1/addimg/shop'"
+                          :action="baseUrl + '/v4/addimg/shop'"
                           :show-file-list="false"
                           :on-success="handleServiceAvatarScucess"
                           :before-upload="beforeAvatarUpload">
@@ -146,7 +146,6 @@
         },
         created(){
             this.initData();
-            console.log(11111)
         },
     	components: {
     		headTop,
@@ -154,21 +153,47 @@
         methods: {
             async initData(){
                 try{
-                    this.city = await cityGuess();
-                    const countData = await getResturantsCount();
-                    if (countData.status == 1) {
-                        this.count = countData.count;
-                    }else{
-                        throw new Error('获取数据失败');
-                    }
-                    this.getResturants();
+                    await cityGuess().then(res => {
+                        this.city = res.data
+                    });
+                    getResturantsCount().then(res => {
+                        const countData = res.data
+                        if (countData.status == 1) {
+                            this.count = countData.count;
+                        }else{
+                            throw new Error('获取数据失败');
+                        }
+                        this.getResturants();
+                    });
                 }catch(err){
                     console.log('获取数据失败', err);
                 }
             },
+            getResturants(){
+                const {latitude, longitude} = this.city;
+                getResturants({latitude, longitude, offset: this.offset, limit: this.limit}).then(res => {
+                    const restaurants = res.data
+                    this.tableData = [];
+                    restaurants.forEach(item => {
+                        const tableData = {};
+                        tableData.name = item.name;
+                        tableData.address = item.address;
+                        tableData.description = item.description;
+                        tableData.id = item.id;
+                        tableData.phone = item.phone;
+                        tableData.rating = item.rating;
+                        tableData.recent_order_num = item.recent_order_num;
+                        tableData.category = item.category;
+                        tableData.image_path = item.image_path;
+                        this.tableData.push(tableData);
+                    })
+                });
+            },
             async getCategory(){
                 try{
-                    const categories = await foodCategory();
+                    const categories = await foodCategory().then(res=>{
+                        return res.data
+                    });
                     categories.forEach(item => {
                         if (item.sub_categories.length) {
                             const addnew = {
@@ -192,24 +217,6 @@
                     console.log('获取商铺种类失败', err);
                 }
             },
-            async getResturants(){
-                const {latitude, longitude} = this.city;
-                const restaurants = await getResturants({latitude, longitude, offset: this.offset, limit: this.limit});
-                this.tableData = [];
-                restaurants.forEach(item => {
-                    const tableData = {};
-                    tableData.name = item.name;
-                    tableData.address = item.address;
-                    tableData.description = item.description;
-                    tableData.id = item.id;
-                    tableData.phone = item.phone;
-                    tableData.rating = item.rating;
-                    tableData.recent_order_num = item.recent_order_num;
-                    tableData.category = item.category;
-                    tableData.image_path = item.image_path;
-                    this.tableData.push(tableData);
-                })
-            },
             handleSizeChange(val) {
                 console.log(`每页 ${val} 条`);
             },
@@ -218,7 +225,9 @@
                 this.offset = (val - 1)*this.limit;
                 this.getResturants()
             },
+            //商店操作
             handleEdit(index, row) {
+                console.log(row)
                 this.selectTable = row;
                 this.address.address = row.address;
                 this.dialogFormVisible = true;
@@ -232,7 +241,9 @@
             },
             async handleDelete(index, row) {
                 try{
-                    const res = await deleteResturant(row.id);
+                    const res = await deleteResturant(row.id).then(res=>{
+                        return res.data
+                    });
                     if (res.status == 1) {
                         this.$message({
                             type: 'success',
@@ -250,24 +261,28 @@
                     console.log('删除店铺失败')
                 }
             },
+
             async querySearchAsync(queryString, cb) {
                 if (queryString) {
                     try{
-                        const cityList = await searchplace(this.city.id, queryString);
-                        if (cityList instanceof Array) {
-                            cityList.map(item => {
-                                item.value = item.address;
-                                return item;
-                            })
-                            cb(cityList)
-                        }
+                        searchplace(this.city.id, queryString).then(res => {
+                            console.log(res.data)
+                            const cityList = res.data
+                            if (cityList instanceof Array) {
+                                cityList.map(item => {
+                                    item.value = item.address;
+                                    return item;
+                                })
+                                cb(cityList)
+                            }
+                        });
                     }catch(err){
                         console.log(err)
                     }
                 }
             },
-            addressSelect(vale){
-                const {address, latitude, longitude} = vale;
+            addressSelect(value){
+                const {address, latitude, longitude} = value;
                 this.address = {address, latitude, longitude};
             },
             handleServiceAvatarScucess(res, file) {
@@ -294,7 +309,9 @@
                 try{
                     Object.assign(this.selectTable, this.address);
                     this.selectTable.category = this.selectedCategory.join('/');
-                    const res = await updateResturant(this.selectTable)
+                    const res = await updateResturant(this.selectTable).then(res=>{
+                        return res.data
+                    })
                     if (res.status == 1) {
                         this.$message({
                             type: 'success',

@@ -3,7 +3,7 @@
 	  	<transition name="form-fade" mode="in-out">
 	  		<section class="form_contianer" v-show="showLogin">
 		  		<div class="manage_tip">
-					<a href="http://localhost:8001/eleme/index.html" style="text-align:center;"><h3>👉客户端入口👈</h3></a><br>
+					<a href="http://47.113.110.19/eleme/index.html" style="text-align:center;"><h3>👉客户端入口👈</h3></a><br>
 		  			<p>后台管理系统</p>
 		  		</div>
 		    	<el-form :model="loginForm" :rules="rules" ref="loginForm">
@@ -47,14 +47,14 @@
 				showLogin: false,
 			}
 		},
+		computed: {
+			...mapState(['adminInfo']),
+		},
 		mounted(){
 			this.showLogin = true;
 			if (!this.adminInfo.id) {
-    			this.getAdminData()
-    		}
-		},
-		computed: {
-			...mapState(['adminInfo']),
+				this.getAdminData()
+			}
 		},
 		methods: {
 			...mapActions(['getAdminData']),
@@ -66,8 +66,9 @@
 							if (res.data.status == 1) {
 								this.$message({
 									type: 'success',
-									message: '登录成功'
+									message: res.data.success
 								});
+								
 								this.$router.push('manage')
 							}else{
 								this.$message({

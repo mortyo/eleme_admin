@@ -78,7 +78,9 @@
         methods: {
             async initData(){
                 try{
-                    const countData = await getUserCount();
+                    const countData = await getUserCount().then(res=>{
+                        return res.data
+                    });
                     if (countData.status == 1) {
                         this.count = countData.count;
                     }else{
@@ -98,7 +100,9 @@
                 this.getUsers()
             },
             async getUsers(){
-                const Users = await getUserList({offset: this.offset, limit: this.limit});
+                const Users = await getUserList({offset: this.offset, limit: this.limit}).then(res=>{
+                    return res.data
+                });
                 this.tableData = [];
                 Users.forEach(item => {
                     const tableData = {};

@@ -18,7 +18,7 @@
                         <span>{{ props.row.restaurant_name }}</span>
                       </el-form-item>
                       <el-form-item label="食品 ID">
-                        <span>{{ props.row.item_id }}</span>
+                        <span>{{ props.row.id }}</span>
                       </el-form-item>
                       <el-form-item label="餐馆 ID">
                         <span>{{ props.row.restaurant_id }}</span>
@@ -75,7 +75,7 @@
                   :total="count">
                 </el-pagination>
             </div>
-            <el-dialog title="修改食品信息" v-model="dialogFormVisible">
+            <el-dialog title="修改食品信息" :visible.sync="dialogFormVisible">
                 <el-form :model="selectTable">
                     <el-form-item label="食品名称" label-width="100px">
                         <el-input v-model="selectTable.name" auto-complete="off"></el-input>
@@ -96,7 +96,7 @@
                     <el-form-item label="食品图片" label-width="100px">
                         <el-upload
                           class="avatar-uploader"
-                          :action="baseUrl + '/v1/addimg/food'"
+                          :action="baseUrl + '/v4/addimg/food'"
                           :show-file-list="false"
                           :on-success="handleServiceAvatarScucess"
                           :before-upload="beforeAvatarUpload">
@@ -138,9 +138,7 @@
                 <el-button type="primary" @click="updateFood">确 定</el-button>
               </div>
             </el-dialog>
-
-
-            <el-dialog title="添加规格" v-model="specsFormVisible">
+            <el-dialog title="添加规格" :visible.sync="specsFormVisible">
 			  	<el-form :rules="specsFormrules" :model="specsForm">
 				    <el-form-item label="规格" label-width="100px" prop="specs">
 				     	<el-input v-model="specsForm.specs" auto-complete="off"></el-input>
@@ -164,7 +162,7 @@
 <script>
     import headTop from '../components/headTop'
     import {baseUrl, baseImgPath} from '@/config/env'
-    import {getFoods, getFoodsCount, getMenu, updateFood, deleteFood, getResturantDetail, getMenuById} from '@/api/getData'
+    import { getFoodsCount,getFoods, getMenu, updateFood, deleteFood, getResturantDetail, getMenuById} from '@/api/getData'
     export default {
         data(){
             return {
@@ -203,8 +201,8 @@
         computed: {
         	specs: function (){
         		let specs = [];
-        		if (this.selectTable.specfoods) {
-	        		this.selectTable.specfoods.forEach(item => {
+        		if (this.selectTable.specs) {
+	        		this.selectTable.specs.forEach(item => {
 	        			specs.push({
 	        				specs: item.specs_name,
 	        				packing_fee: item.packing_fee,
@@ -221,51 +219,57 @@
         methods: {
             async initData(){
                 try{
-                    const countData = await getFoodsCount({shop_id: this.restaurant_id});
-                    console.log(countData)
-                    if (countData.status == 1) {
-                        this.count = countData.count;
-                    }else{
-                        throw new Error('获取数据失败');
-                    }
-                    this.getFoods();
+                    getFoodsCount({shop_id: this.restaurant_id}).then(res=>{
+                        const countData = res.data
+                        if (countData.status == 1) {
+                            this.count = countData.count;
+                        }else{
+                            throw new Error('获取数据失败');
+                        }
+                        this.getFoods();
+                    });
                 }catch(err){
                     console.log('获取数据失败', err);
                 }
             },
+            async getFoods(){
+                getFoods({offset: this.offset, limit: this.limit, shop_id: this.restaurant_id}).then(res => {
+                    const Foods = res.data
+                    this.tableData = [];
+                    Foods.forEach((item, index) => {
+                        const tableData = {};
+                        tableData.name = item.name;
+                        tableData.id = item.id;
+                        tableData.description = item.description;
+                        tableData.rating = item.rating;
+                        tableData.month_sales = item.month_sales;
+                        tableData.restaurant_id = item.shop_id;
+                        tableData.category_id = item.category_id;
+                        tableData.image_path = item.image_path;
+                        tableData.specs = item.specs;
+                        tableData.index = index;
+                        this.tableData.push(tableData);
+                    })
+                });
+            },
             async getMenu(){
             	this.menuOptions = [];
                 try{
-                    const menu = await getMenu({restaurant_id: this.selectTable.restaurant_id, allMenu: true});
-                    menu.forEach((item, index) => {
-                        this.menuOptions.push({
-                        	label: item.name,
-                        	value: item.id,
-                        	index,
+                    getMenu(this.selectTable.restaurant_id).then(res=>{
+                        const menu = res.data.category_list
+                        menu.forEach((item, index) => {
+                            this.menuOptions.push({
+                                label: item.name,
+                                value: item.id,
+                                index,
+                            })
                         })
-                    })
+                    });
                 }catch(err){
                     console.log('获取食品种类失败', err);
                 }
             },
-            async getFoods(){
-                const Foods = await getFoods({offset: this.offset, limit: this.limit, restaurant_id: this.restaurant_id});
-                this.tableData = [];
-                Foods.forEach((item, index) => {
-                    const tableData = {};
-                    tableData.name = item.name;
-                    tableData.item_id = item.item_id;
-                    tableData.description = item.description;
-                    tableData.rating = item.rating;
-                    tableData.month_sales = item.month_sales;
-                    tableData.restaurant_id = item.restaurant_id;
-                    tableData.category_id = item.category_id;
-                    tableData.image_path = item.image_path;
-                    tableData.specfoods = item.specfoods;
-                    tableData.index = index;
-                    this.tableData.push(tableData);
-                })
-            },
+
             tableRowClassName(row, index) {
 		        if (index === 1) {
 		        	return 'info-row';
@@ -304,11 +308,16 @@
             	this.getSelectItemData(row, 'edit')
                 this.dialogFormVisible = true;
             },
+            //获取选中项目数据
             async getSelectItemData(row, type){
-            	const restaurant = await getResturantDetail(row.restaurant_id);
-            	const category = await getMenuById(row.category_id)
+                const restaurant = await getResturantDetail(row.restaurant_id).then(res=>{
+                    return res.data
+                });
+                const category = await getMenuById(row.category_id).then(res=>{
+                    return res.data
+                })
+                console.log(category)
                 this.selectTable = {...row, ...{restaurant_name: restaurant.name, restaurant_address: restaurant.address, category_name: category.name}};
-
                 this.selectMenu = {label: category.name, value: row.category_id}
                 this.tableData.splice(row.index, 1, {...this.selectTable});
                 this.$nextTick(() => {
@@ -324,16 +333,23 @@
             },
             async handleDelete(index, row) {
                 try{
-                    const res = await deleteFood(row.item_id);
-                    if (res.status == 1) {
-                        this.$message({
-                            type: 'success',
-                            message: '删除食品成功'
-                        });
-                        this.tableData.splice(index, 1);
-                    }else{
-                        throw new Error(res.message)
-                    }
+                    console.log(row.id)
+                    deleteFood(row.id).then(respond=>{
+                        let res = respond.data
+                        if (res.status == 1) {
+                            this.$message({
+                                type: 'success',
+                                message: '删除食品成功'
+                            });
+                            this.tableData.splice(index, 1);
+                        }else{
+                            this.$message({
+                                type: 'error',
+                                message: res.message
+                            });
+                            throw new Error(res.message)
+                        }
+                    });
                 }catch(err){
                     this.$message({
                         type: 'error',
@@ -365,20 +381,24 @@
                 this.dialogFormVisible = false;
                 try{
                 	const subData = {new_category_id: this.selectMenu.value, specs: this.specs};
-                	const postData = {...this.selectTable, ...subData};
-                    const res = await updateFood(postData)
-                    if (res.status == 1) {
-                        this.$message({
-                            type: 'success',
-                            message: '更新食品信息成功'
-                        });
-                        this.getFoods();
-                    }else{
-                        this.$message({
-                            type: 'error',
-                            message: res.message
-                        });
-                    }
+                    const postData = {...this.selectTable, ...subData};
+                    console.log(postData)
+                    updateFood(postData).then(respond => {
+                        const res = respond.data
+                        console.log(res)
+                        if (res.status == 1) {
+                            this.$message({
+                                type: 'success',
+                                message: '更新食品信息成功'
+                            });
+                            this.getFoods();
+                        }else{
+                            this.$message({
+                                type: 'error',
+                                message: res.message
+                            });
+                        }
+                    })
                 }catch(err){
                     console.log('更新餐馆信息失败', err);
                 }

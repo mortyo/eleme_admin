@@ -239,8 +239,12 @@
     	methods: {
     		async initData(){
     			try{
-    				this.city = await cityGuess();
-    				const categories = await foodCategory();
+    				await cityGuess().then(res => {
+						this.city = res.data
+					});
+    				const categories = await foodCategory().then(res=>{
+						return res.data
+					});
     				categories.forEach(item => {
     					if (item.sub_categories.length) {
     						const addnew = {
@@ -268,14 +272,16 @@
     		async querySearchAsync(queryString, cb) {
     			if (queryString) {
 	    			try{
-	    				const cityList = await searchplace(this.city.id, queryString);
-	    				if (cityList instanceof Array) {
-		    				cityList.map(item => {
-		    					item.value = item.address;
-		    					return item;
-		    				})
-		    				cb(cityList)
-	    				}
+	    				searchplace(this.city.id, queryString).then(res => {
+							const cityList = res.data
+							if (cityList instanceof Array) {
+								cityList.map(item => {
+									item.value = item.address;
+									return item;
+								})
+								cb(cityList)
+							}
+						});
 	    			}catch(err){
 	    				console.log(err)
 	    			}
@@ -388,47 +394,49 @@
 							category: this.selectedCategory.join('/')
 						})
 						try{
-							let result = await addShop(this.formData);
-							if (result.status == 1) {
-								this.$message({
-					            	type: 'success',
-					            	message: '添加成功'
-					          	});
-					          	this.formData = {
-									name: '', //店铺名称
-									address: '', //地址
-									latitude: '',
-									longitude: '',
-									description: '', //介绍
-									phone: '',
-									promotion_info: '',
-									float_delivery_fee: 5, //运费
-									float_minimum_order_amount: 20, //起价
-									is_premium: true,
-									delivery_mode: true,
-									new: true,
-									bao: true,
-									zhun: true,
-									piao: true,
-									startTime: '',
-				       	 			endTime: '',
-				       	 			image_path: '',
-				       	 			business_license_image: '',
-				       	 			catering_service_license_image: '',
-						        };
-						        this.selectedCategory = ['快餐便当', '简餐'];
-						        this.activities = [{
-						        	icon_name: '减',
-						        	name: '满减优惠',
-						        	description: '满30减5，满60减8',
-							    }];
-							}else{
-								this.$message({
-					            	type: 'error',
-					            	message: result.message
-					          	});
-							}
-							console.log(result)
+							addShop(this.formData).then(res=>{
+								let result = res.data
+								if (result.status == 1) {
+									this.$message({
+										type: 'success',
+										message: '添加成功'
+									  });
+									  this.formData = {
+										name: '', //店铺名称
+										address: '', //地址
+										latitude: '',
+										longitude: '',
+										description: '', //介绍
+										phone: '',
+										promotion_info: '',
+										float_delivery_fee: 5, //运费
+										float_minimum_order_amount: 20, //起价
+										is_premium: true,
+										delivery_mode: true,
+										new: true,
+										bao: true,
+										zhun: true,
+										piao: true,
+										startTime: '',
+											endTime: '',
+											image_path: '',
+											business_license_image: '',
+											catering_service_license_image: '',
+									};
+									this.selectedCategory = ['快餐便当', '简餐'];
+									this.activities = [{
+										icon_name: '减',
+										name: '满减优惠',
+										description: '满30减5，满60减8',
+									}];
+								}else{
+									this.$message({
+										type: 'error',
+										message: result.message
+									  });
+								}
+								console.log(result)
+							});
 						}catch(err){
 							console.log(err)
 						}

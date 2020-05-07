@@ -85,7 +85,9 @@
         methods: {
             async initData(){
                 try{
-                    const countData = await getOrderCount({restaurant_id: this.restaurant_id});
+                    const countData = await getOrderCount({restaurant_id: this.restaurant_id}).then(res=>{
+                        return res.data
+                    });
                     if (countData.status == 1) {
                         this.count = countData.count;
                     }else{
@@ -105,7 +107,9 @@
                 this.getOrders()
             },
             async getOrders(){
-                const Orders = await getOrderList({offset: this.offset, limit: this.limit, restaurant_id: this.restaurant_id});
+                const Orders = await getOrderList({offset: this.offset, limit: this.limit, restaurant_id: this.restaurant_id}).then(res=>{
+                    return res.data
+                });
                 this.tableData = [];
                 Orders.forEach((item, index) => {
                     const tableData = {};
@@ -121,9 +125,15 @@
             },
             async expand(row, status){
             	if (status) {
-            		const restaurant = await getResturantDetail(row.restaurant_id);
-	            	const userInfo = await getUserInfo(row.user_id);
-	            	const addressInfo = await getAddressById(row.address_id);
+            		const restaurant = await getResturantDetail(row.restaurant_id).then(res=>{
+                        return res.data
+                    });
+	            	const userInfo = await getUserInfo(row.user_id).then(res=>{
+                        return res.data
+                    });
+	            	const addressInfo = await getAddressById(row.address_id).then(res=>{
+                        return res.data
+                    });
 
 	                this.tableData.splice(row.index, 1, {...row, ...{restaurant_name: restaurant.name, restaurant_address: restaurant.address, address: addressInfo.address, user_name: userInfo.username}});
                     this.$nextTick(() => {

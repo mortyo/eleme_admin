@@ -40,7 +40,9 @@
 				if (command == 'home') {
 					this.$router.push('/manage');
 				}else if(command == 'signout'){
-					const res = await signout()
+					const res = await signout().then(res=>{
+						return res.data
+					})
 					if (res.status == 1) {
 						this.$message({
 	                        type: 'success',
